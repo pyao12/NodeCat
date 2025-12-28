@@ -22,16 +22,6 @@ jobs:
           node-version: 24
           cache: 'npm'
 
-      - name: Cache NSIS
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ env.LOCALAPPDATA }}\electron-builder\Cache
-            ${{ env.LOCALAPPDATA }}\electron-builder\nsis
-          key: nsis-${{ runner.os }}-${{ hashFiles('package.json') }}
-          restore-keys: |
-            nsis-${{ runner.os }}-
-
       - name: Install dependencies
         run: npm ci
 
