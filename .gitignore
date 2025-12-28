@@ -1,0 +1,12 @@
+# Editor settings
+.vscode/
+.idea/
+.trae/
+
+# Dist files
+dist/
+dist-electron/
+release/
+
+# NodeJS
+node_modules/
