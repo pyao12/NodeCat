@@ -19,7 +19,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 24
           cache: 'npm'
 
       - name: Cache NSIS
@@ -27,7 +27,7 @@ jobs:
         with:
           path: |
             ${{ env.LOCALAPPDATA }}\electron-builder\Cache
-            ${{ env.LOCALAPPDATA }}\electron\Cache
+            ${{ env.LOCALAPPDATA }}\electron-builder\nsis
           key: nsis-${{ runner.os }}-${{ hashFiles('package.json') }}
           restore-keys: |
             nsis-${{ runner.os }}-
