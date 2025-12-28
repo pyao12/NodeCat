@@ -4,7 +4,6 @@
   "appId": "top.patrick2012.nodecat",
   "asar": true,
   "productName": "NodeCat",
-  "publish": "always",
   "directories": {
     "output": "release/"
   },

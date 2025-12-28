@@ -19,13 +19,21 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Cache NSIS
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.electron-builder/nsis
+            ~/.cache/electron-builder
+          key: nsis-${{ runner.os }}-${{ hashFiles('package.json') }}
+          restore-keys: |
+            nsis-${{ runner.os }}-
+
       - name: Install dependencies
         run: npm ci
 
       - name: Build Electron app
         run: npm run build
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
