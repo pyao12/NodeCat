@@ -11,7 +11,7 @@
             @save-as="handleSaveAs"
         />
         <div class="flex-1 flex flex-col overflow-hidden">
-            <div class="flex items-center bg-gray-800 border-b border-gray-700 overflow-x-auto">
+            <div class="flex items-center bg-gray-800 border-b border-gray-700 overflow-x-auto no-scroll-bar">
                 <div
                     v-for="tab in tabs"
                     :key="tab.id"
@@ -20,7 +20,7 @@
                     @click="switchTab(tab.id)"
                 >
                     <span class="mr-1 truncate">
-                        {{ tab.filePath ? tab.filePath.split('\\').pop() : 'Untitled' }}
+                        {{ tab.filePath ? tab.filePath.split('/').pop() : 'Untitled' }}
                     </span>
                     <span v-if="tab.isModified" class="text-red-400">●</span>
                     <button
@@ -179,26 +179,77 @@ async function handleSaveAs() {
 }
 
 function handleKeyDown(event: KeyboardEvent) {
-    if (event.ctrlKey && event.key === 'n') {
+    if (event.ctrlKey && event.key === "n") {
         event.preventDefault();
         handleNew();
-    } else if (event.ctrlKey && event.key === 'o') {
+    } else if (event.ctrlKey && event.key === "o") {
         event.preventDefault();
         handleOpen();
-    } else if (event.ctrlKey && event.key === 's' && !event.shiftKey) {
+    } else if (event.ctrlKey && event.key === "s" && !event.shiftKey) {
         event.preventDefault();
         handleSave();
-    } else if (event.ctrlKey && event.shiftKey && event.key === 's') {
+    } else if (event.ctrlKey && event.shiftKey && event.key === "s") {
         event.preventDefault();
         handleSaveAs();
     }
 }
 
 onMounted(() => {
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    
+    (window as any).ipcRenderer.on("request-unsaved-files", () => {
+        const unsavedFiles = tabs.value
+            .filter(tab => tab.isModified)
+            .map(tab => ({
+                id: tab.id,
+                name: tab.filePath ? tab.filePath.split("/").pop() : 'Untitled'
+            }));
+        (window as any).electronAPI.replyUnsavedFiles(unsavedFiles);
+    });
+
+    (window as any).ipcRenderer.on("request-save-file", (event, tabId: string) => {
+        const tab = tabs.value.find(t => t.id === tabId);
+        if (tab) {
+            if (tab.filePath) {
+                (window as any).electronAPI.fileSave(tab.content).then((result: string | null) => {
+                    if (result) {
+                        tab.isModified = false;
+                    }
+                    (window as any).electronAPI.replySaveFile(!!result);
+                }).catch(() => {
+                    (window as any).electronAPI.replySaveFile(false);
+                });
+            } else {
+                (window as any).electronAPI.fileSaveAs(tab.content).then((result: string | null) => {
+                    if (result) {
+                        tab.filePath = result;
+                        tab.isModified = false;
+                    }
+                    (window as any).electronAPI.replySaveFile(!!result);
+                }).catch(() => {
+                    (window as any).electronAPI.replySaveFile(false);
+                });
+            }
+        } else {
+            (window as any).electronAPI.replySaveFile(false);
+        }
+    });
 });
 
 onUnmounted(() => {
     window.removeEventListener('keydown', handleKeyDown);
 });
 </script>
+
+<style>
+.no-scroll-bar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.no-scroll-bar::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+</style>

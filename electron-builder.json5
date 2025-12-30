@@ -22,13 +22,22 @@
     "icon": "public/favicon.ico",
     "target": [
       {
-        "target": "msi",
+        "target": "nsis",
         "arch": [
           "x64"
         ]
       }
     ],
     "artifactName": "${productName}-Windows-${version}-Setup.${ext}"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "NodeCat",
+    "perMachine": true,
+    "runAfterFinish": true
   },
   "linux": {
     "target": [

@@ -7,6 +7,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
     fileOpen: () => ipcRenderer.invoke("file-open"),
     fileSave: (content: string) => ipcRenderer.invoke("file-save", content),
     fileSaveAs: (content: string) => ipcRenderer.invoke("file-save-as", content),
+    requestUnsavedFiles: () => ipcRenderer.send("request-unsaved-files"),
+    replyUnsavedFiles: (files: Array<{id: string, name: string}>) => ipcRenderer.send("reply-unsaved-files", files),
+    requestSaveFile: (id: string) => ipcRenderer.send("request-save-file", id),
+    replySaveFile: (success: boolean) => ipcRenderer.send("reply-save-file", success),
 });
 
 contextBridge.exposeInMainWorld("ipcRenderer", {

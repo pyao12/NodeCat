@@ -19,6 +19,7 @@
                         spellcheck="false"
                         @input="onInput"
                         @scroll="syncScroll"
+                        @keydown="handleKeyDown"
                     ></textarea>
                     <pre
                         ref="preRef"
@@ -107,6 +108,25 @@
         }
     }
 
+    function handleKeyDown(e: KeyboardEvent) {
+        if (e.key === "Tab") {
+            e.preventDefault();
+            const start = (e.target as HTMLTextAreaElement).selectionStart;
+            const end = (e.target as HTMLTextAreaElement).selectionEnd;
+            const value = code.value;
+            
+            const newValue = value.substring(0, start) + "    " + value.substring(end);
+            code.value = newValue;
+            emit("update:modelValue", newValue);
+            
+            nextTick(() => {
+                if (textareaRef.value) {
+                    textareaRef.value.selectionStart = textareaRef.value.selectionEnd = start + 4;
+                }
+            });
+        }
+    }
+
     function detectLanguage(filePath: string | null | undefined) {
         if (!filePath) return;
         const ext = filePath.split(".").pop()?.toLowerCase() || "";
@@ -188,5 +208,23 @@
     }
     .hljs-built_in {
         color: #4ec9b0;
+    }
+    textarea::-webkit-scrollbar,
+    pre::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    textarea::-webkit-scrollbar-track,
+    pre::-webkit-scrollbar-track {
+        background: #1f2937;
+    }
+    textarea::-webkit-scrollbar-thumb,
+    pre::-webkit-scrollbar-thumb {
+        background: #4b5563;
+        border-radius: 3px;
+    }
+    textarea::-webkit-scrollbar-thumb:hover,
+    pre::-webkit-scrollbar-thumb:hover {
+        background: #6b7280;
     }
 </style>

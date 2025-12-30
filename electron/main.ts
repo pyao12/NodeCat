@@ -8,7 +8,7 @@ process.env.APP_ROOT = path.join(__dirname, "..");
 
 export const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 export const MAIN_DIST = path.join(process.env.APP_ROOT, "dist-electron");
-export const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist/web");
+export const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
 
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
 
@@ -28,6 +28,61 @@ function createWindow() {
     window.webContents.on("did-finish-load", () => {
         window?.webContents.send("main-process-message", (new Date()).toLocaleString());
     });
+    
+    window.on("close", async (e) => {
+        e.preventDefault();
+        window?.webContents.send("request-unsaved-files");
+        const unsavedFiles = await new Promise((resolve) => {
+            const timeout = setTimeout(() => {
+                console.error("Timeout waiting for unsaved files");
+                resolve([]);
+            }, 3000);
+            
+            ipcMain.once("reply-unsaved-files", (event, files) => {
+                clearTimeout(timeout);
+                resolve(files);
+            });
+        });
+        
+        const files = unsavedFiles as Array<{id: string, name: string}>;
+        if (!files || files.length === 0) {
+            window?.destroy();
+            return;
+        }
+        
+        for (const file of files) {
+            const { response } = await dialog.showMessageBox(window!, {
+                type: "warning",
+                buttons: ["Save", "Don't Save", "Cancel"],
+                defaultId: 0,
+                cancelId: 2,
+                title: "Unsaved Changes",
+                message: `Do you want to save changes to ${file.name}?`,
+            });
+            
+            if (response === 0) {
+                window?.webContents.send("request-save-file", file.id);
+                
+                // 等待保存完成
+                await new Promise((resolve) => {
+                    const timeout = setTimeout(() => {
+                        console.error("Timeout waiting for file save");
+                        resolve(null);
+                    }, 5000);
+                    
+                    ipcMain.once("reply-save-file", (event, success) => {
+                        clearTimeout(timeout);
+                        resolve(success);
+                    });
+                });
+            } else if (response === 2) {
+                return;
+            }
+        }
+        
+        window?.destroy();
+    });
+    
     if (VITE_DEV_SERVER_URL) {
         window.loadURL(VITE_DEV_SERVER_URL);
     } else {

@@ -31,7 +31,14 @@ export default defineConfig({
     }),
   ],
   build: {
-    outDir: 'dist/web',
+    outDir: 'dist',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'highlight.js': ['highlight.js'],
+        },
+      },
+    },
   },
   css: {
     postcss: {
