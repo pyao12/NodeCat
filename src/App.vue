@@ -22,13 +22,15 @@
                     <span class="mr-1 truncate">
                         {{ tab.filePath ? tab.filePath.split('/').pop() : 'Untitled' }}
                     </span>
-                    <span v-if="tab.isModified" class="text-red-400">●</span>
+                    <span v-if="tab.isModified" class="text-red-400">
+                        <font-awesome-icon icon="fa-solid fa-circle-dot" />
+                    </span>
                     <button
                         class="ml-2 p-1 text-gray-400 hover:text-white hover:bg-gray-700 rounded-full transition-colors"
                         @click.stop="closeTab(tab.id)"
                         title="Close tab"
                     >
-                        ×
+                        <font-awesome-icon icon="fa-solid fa-xmark" />
                     </button>
                 </div>
             </div>

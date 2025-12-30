@@ -15,4 +15,5 @@ function deleteFolderRecursive(path) {
 }
 
 deleteFolderRecursive("dist");
+deleteFolderRecursive("dist-electron");
 deleteFolderRecursive("release");

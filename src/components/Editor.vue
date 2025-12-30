@@ -40,6 +40,7 @@
 <script lang="ts" setup>
     import { ref, computed, watch, onMounted, nextTick } from "vue";
     import hljs from "highlight.js";
+    import "highlight.js/styles/atom-one-dark.css";
 
     const props = defineProps<{
         modelValue: string;
@@ -163,52 +164,6 @@
 </script>
 
 <style>
-    .hljs {
-        color: #d4d4d4;
-        background: transparent;
-    }
-    .hljs-keyword {
-        color: #569cd6;
-    }
-    .hljs-string {
-        color: #ce9178;
-    }
-    .hljs-number {
-        color: #b5cea8;
-    } 
-    .hljs-comment {
-        color: #6a9955;
-    }
-    .hljs-function {
-        color: #dcdcaa;
-    }
-    .hljs-class {
-        color: #4ec9b0;
-    }
-    .hljs-variable {
-        color: #9cdcfe;
-    }
-    .hljs-operator {
-        color: #d4d4d4;
-    }
-    .hljs-punctuation {
-        color: #d4d4d4;
-    }
-    .hljs-property {
-        color: #9cdcfe;
-    }
-    .hljs-tag {
-        color: #569cd6;
-    }
-    .hljs-attr {
-        color: #9cdcfe;
-    }
-    .hljs-title {
-        color: #dcdcaa;
-    }
-    .hljs-built_in {
-        color: #4ec9b0;
-    }
     textarea::-webkit-scrollbar,
     pre::-webkit-scrollbar {
         width: 6px;
