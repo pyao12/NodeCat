@@ -1,39 +1,39 @@
 name: Build and Release
 
 on:
-  pull_request:
-    branches:
-      - main
-  push:
-    branches:
-      - main
+    pull_request:
+        branches:
+            - main
+    push:
+        branches:
+            - main
 
 jobs:
-  build:
-    runs-on: windows-latest
+    build:
+        runs-on: windows-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: 'npm'
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+                  cache: "npm"
 
-      - name: Install dependencies
-        run: npm install
+            - name: Install dependencies
+              run: npm install
 
-      - name: Build Electron app
-        run: npm run build
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+            - name: Build Electron app
+              run: npm run build
+              env:
+                  GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      - name: Upload release artifacts
-        if: github.event_name == 'push'
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-artifacts
-          path: release/
-          retention-days: 5
+            - name: Upload release artifacts
+              if: github.event_name == 'push'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: release-artifacts
+                  path: release/
+                  retention-days: 5

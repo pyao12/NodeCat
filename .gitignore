@@ -3,7 +3,7 @@
 .idea/
 .trae/
 
-# Dist files
+# dist files
 dist/
 dist-electron/
 release/
