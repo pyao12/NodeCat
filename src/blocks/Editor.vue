@@ -1,36 +1,59 @@
 <template>
+    <!-- eslint-disable vue/no-v-html -->
     <div class="flex h-full flex-col bg-gray-900">
         <div class="relative flex-1 overflow-hidden">
             <div class="absolute inset-0 flex">
                 <div
-                    class="w-10 select-none border-r border-gray-700 bg-gray-800 pr-2 pt-4 text-right"
+                    ref="lineNumbersRef"
+                    class="line-numbers w-10 select-none overflow-auto border-r border-gray-700 bg-gray-800 pr-2 pt-4 text-right"
+                    style="scrollbar-width: none; -ms-overflow-style: none"
+                    @scroll="syncScrollFromLineNumbers"
                 >
                     <div
-                        v-for="line in lineCount"
+                        v-for="line in visibleLineCount"
                         :key="line"
                         class="font-mono text-xs leading-6 text-gray-500"
                     >
-                        {{ line }}
+                        {{ line <= lineCount ? line : "" }}
                     </div>
                 </div>
                 <div class="relative flex-1">
                     <textarea
                         ref="textareaRef"
                         v-model="code"
-                        class="h-full w-full resize-none bg-gray-900 p-4 font-mono text-sm leading-6 text-gray-200 focus:outline-none"
+                        :class="[
+                            'h-full w-full resize-none overflow-auto whitespace-pre bg-transparent p-4 font-mono text-sm leading-6 caret-white focus:outline-none',
+                            isComposing ? 'text-gray-200' : 'text-transparent',
+                        ]"
                         spellcheck="false"
+                        style="
+                            word-wrap: normal;
+                            white-space: pre;
+                            overflow-wrap: normal;
+                            min-height: 100%;
+                        "
                         @input="onInput"
                         @scroll="syncScroll"
                         @keydown="handleKeyDown"
+                        @compositionstart="onCompositionStart"
+                        @compositionend="onCompositionEnd"
                     ></textarea>
                     <pre
                         ref="preRef"
-                        class="pointer-events-none absolute inset-0 m-0"
+                        class="pointer-events-none absolute inset-0 m-0 overflow-auto"
                         aria-hidden="true"
+                        style="
+                            white-space: pre;
+                            word-wrap: normal;
+                            overflow-wrap: normal;
+                            min-height: 100%;
+                        "
+                        @scroll="syncScrollFromPre"
                     ><code
                         ref="codeRef"
                         class="font-mono text-sm leading-6 p-4 block"
                         :class="`text-white language-${selectedLanguage}`"
+                        style="white-space: pre; word-wrap: normal; overflow-wrap: normal; min-height: 100%"
                         v-html="highlightedCode"
                     ></code></pre>
                 </div>
@@ -73,10 +96,18 @@ const selectedLanguage = ref("javascript")
 const code = ref(props.modelValue || "")
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const preRef = ref<HTMLElement | null>(null)
+const lineNumbersRef = ref<HTMLDivElement | null>(null)
+const isComposing = ref(false)
 
 const lineCount = computed(() => {
     const lines = code.value.split("\n")
     return lines.length
+})
+
+const visibleLineCount = computed(() => {
+    const lines = code.value.split("\n")
+    const minVisibleLines = Math.max(lines.length, 100)
+    return Math.max(minVisibleLines, lines.length + 50)
 })
 
 const highlightedCode = computed(() => {
@@ -104,10 +135,34 @@ function onInput() {
     emit("update:modelValue", code.value)
 }
 
+function onCompositionStart() {
+    isComposing.value = true
+}
+
+function onCompositionEnd() {
+    isComposing.value = false
+}
+
 function syncScroll() {
-    if (textareaRef.value && preRef.value) {
+    if (textareaRef.value && preRef.value && lineNumbersRef.value) {
         preRef.value.scrollTop = textareaRef.value.scrollTop
         preRef.value.scrollLeft = textareaRef.value.scrollLeft
+        lineNumbersRef.value.scrollTop = textareaRef.value.scrollTop
+    }
+}
+
+function syncScrollFromPre() {
+    if (preRef.value && textareaRef.value && lineNumbersRef.value) {
+        textareaRef.value.scrollTop = preRef.value.scrollTop
+        textareaRef.value.scrollLeft = preRef.value.scrollLeft
+        lineNumbersRef.value.scrollTop = preRef.value.scrollTop
+    }
+}
+
+function syncScrollFromLineNumbers() {
+    if (lineNumbersRef.value && textareaRef.value && preRef.value) {
+        textareaRef.value.scrollTop = lineNumbersRef.value.scrollTop
+        preRef.value.scrollTop = lineNumbersRef.value.scrollTop
     }
 }
 
@@ -183,5 +238,11 @@ pre::-webkit-scrollbar-thumb {
 textarea::-webkit-scrollbar-thumb:hover,
 pre::-webkit-scrollbar-thumb:hover {
     background: #6b7280;
+}
+
+.line-numbers::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
 }
 </style>

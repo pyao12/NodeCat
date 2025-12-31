@@ -5,10 +5,19 @@
             :content="content"
             :current-file-path="currentFilePath"
             :is-modified="isModified"
+            :can-undo="canUndo"
+            :can-redo="canRedo"
             @new="handleNew"
             @open="handleOpen"
             @save="handleSave"
             @save-as="handleSaveAs"
+            @quit="handleQuit"
+            @undo="handleUndo"
+            @redo="handleRedo"
+            @cut="handleCut"
+            @copy="handleCopy"
+            @paste="handlePaste"
+            @select-all="handleSelectAll"
         />
         <div class="flex flex-1 overflow-hidden">
             <div class="flex flex-1 flex-col overflow-hidden">
@@ -27,7 +36,7 @@
                         @click="switchTab(tab.id)"
                     >
                         <span class="mr-1 truncate">
-                            {{ tab.filePath ? tab.filePath.split("/").pop() : "Untitled" }}
+                            {{ getTabDisplayName(tab) }}
                         </span>
                         <span v-if="tab.isModified" class="text-red-400">
                             <font-awesome-icon icon="fa-solid fa-circle-dot" />
@@ -99,6 +108,9 @@ const lineCount = computed(() => {
     return lines.length === 1 && lines[0] === "" ? 0 : lines.length
 })
 
+const canUndo = ref(false)
+const canRedo = ref(false)
+
 function createNewTab(filePath: string | null = null, initialContent: string = ""): Tab {
     const newTab: Tab = {
         id: generateId(),
@@ -115,6 +127,11 @@ createNewTab()
 
 function switchTab(tabId: string) {
     activeTabId.value = tabId
+}
+
+function getTabDisplayName(tab: Tab): string {
+    if (!tab.filePath) return "Untitled"
+    return tab.filePath.split("/").pop() || ""
 }
 
 function closeTab(tabId: string) {
@@ -183,6 +200,52 @@ async function handleSaveAs() {
         }
     } catch (error) {
         console.error("Failed to save file:", error)
+    }
+}
+
+function handleQuit() {
+    window.close()
+}
+
+function handleUndo() {
+    const editor = document.querySelector("textarea")
+    if (editor) {
+        document.execCommand("undo")
+    }
+}
+
+function handleRedo() {
+    const editor = document.querySelector("textarea")
+    if (editor) {
+        document.execCommand("redo")
+    }
+}
+
+function handleCut() {
+    const editor = document.querySelector("textarea")
+    if (editor) {
+        document.execCommand("cut")
+    }
+}
+
+function handleCopy() {
+    const editor = document.querySelector("textarea")
+    if (editor) {
+        document.execCommand("copy")
+    }
+}
+
+function handlePaste() {
+    const editor = document.querySelector("textarea")
+    if (editor) {
+        document.execCommand("paste")
+    }
+}
+
+function handleSelectAll() {
+    const editor = document.querySelector("textarea")
+    if (editor) {
+        document.execCommand("selectAll")
     }
 }
 

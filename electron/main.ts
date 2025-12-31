@@ -66,7 +66,6 @@ function createWindow() {
             if (response === 0) {
                 window?.webContents.send("request-save-file", file.id)
 
-                // 等待保存完成
                 await new Promise(resolve => {
                     const timeout = setTimeout(() => {
                         console.error("Timeout waiting for file save")
@@ -110,16 +109,7 @@ ipcMain.on("window-close", () => {
 ipcMain.handle("file-open", async () => {
     const result = await dialog.showOpenDialog(window!, {
         properties: ["openFile"],
-        filters: [
-            { name: "All Files", extensions: ["*"] },
-            { name: "JavaScript Files", extensions: ["js", "jsx"] },
-            { name: "TypeScript Files", extensions: ["ts", "tsx"] },
-            { name: "CSS Files", extensions: ["css", "scss", "sass", "less"] },
-            { name: "Vue Template Files", extensions: ["vue"] },
-            { name: "Markdown Files", extensions: ["md"] },
-            { name: "JSON Files", extensions: ["json"] },
-            { name: "Text Files", extensions: ["txt"] },
-        ],
+        filters: [{ name: "All Files", extensions: ["*"] }],
     })
     if (!result.canceled && result.filePaths.length > 0) {
         const filePath = result.filePaths[0]
@@ -140,15 +130,7 @@ ipcMain.handle("file-save", async (_event, content: string) => {
 
 ipcMain.handle("file-save-as", async (_event, content: string) => {
     const result = await dialog.showSaveDialog(window!, {
-        filters: [
-            { name: "All Files", extensions: ["*"] },
-            { name: "Text Files", extensions: ["txt"] },
-            { name: "Markdown Files", extensions: ["md"] },
-            { name: "JSON Files", extensions: ["json"] },
-            { name: "JavaScript Files", extensions: ["js", "jsx"] },
-            { name: "TypeScript Files", extensions: ["ts", "tsx"] },
-            { name: "Vue Template Files", extensions: ["vue"] },
-        ],
+        filters: [{ name: "All Files", extensions: ["*"] }],
     })
     if (!result.canceled && result.filePath) {
         fs.writeFileSync(result.filePath, content, "utf-8")
@@ -162,7 +144,6 @@ ipcMain.handle("get-current-work-dir", async () => {
     return process.cwd()
 })
 
-// events of MacOS to close the app
 app.on("window-all-closed", () => {
     window = null
     if (process.platform !== "darwin") {
@@ -175,5 +156,4 @@ app.on("activate", () => {
     }
 })
 
-// create window if ready
 app.whenReady().then(createWindow)

@@ -9,8 +9,35 @@ import {
     faMinimize,
     faWindowMaximize,
     faCircleDot,
+    faPlus,
+    faFloppyDisk,
+    faFile,
+    faBookmark,
+    faPowerOff,
+    faRotateLeft,
+    faRotateRight,
+    faScissors,
+    faCopy,
+    faPaste,
+    faObjectGroup,
 } from "@fortawesome/free-solid-svg-icons"
 
-library.add(faXmark, faMinimize, faWindowMaximize, faCircleDot)
+library.add(
+    faXmark,
+    faMinimize,
+    faWindowMaximize,
+    faCircleDot,
+    faPlus,
+    faFloppyDisk,
+    faFile,
+    faBookmark,
+    faPowerOff,
+    faRotateLeft,
+    faRotateRight,
+    faScissors,
+    faCopy,
+    faPaste,
+    faObjectGroup
+)
 
 createApp(App).component("font-awesome-icon", FontAwesomeIcon).mount("#app")
